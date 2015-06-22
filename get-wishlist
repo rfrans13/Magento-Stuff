@@ -1,0 +1,17 @@
+<?php
+ $customer = Mage::getSingleton('customer/session')->getCustomer();
+ if($customer->getId())
+{
+     $wishlist = Mage::getModel('wishlist/wishlist')->loadByCustomer($customer, true);
+     $wishListItemCollection = $wishlist->getItemCollection();
+     foreach ($wishListItemCollection as $item)
+     {
+           echo $item->getName()."</br>";
+           echo $item->getId()."</br>";
+           echo $item->getPrice()."</br>";
+           echo $item->getQty()."</br>";  
+           $item = Mage::getModel('catalog/product')->setStoreId($item->getStoreId())->load($item->getProductId());
+          if ($item->getId()) :
+?>
+<img src="<?php echo Mage::helper('catalog/image')->init($item, 'small_image')->resize(113, 113); ?>" width="113" height="113" />
+<?php endif; } } ?>
