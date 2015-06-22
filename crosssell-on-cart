@@ -1,0 +1,102 @@
+<?php
+// go to /app/design/frontend/your_template/default/template/checkout/cart.phtml
+// Find getChildHtml(‘crosssell’) ?>
+// Add the following code right before
+?>
+
+<!-- Related products block START -->
+<div>
+<?php
+	$array_added_product = array();
+	$total_product= "";
+	$last_product= "";
+?>
+
+<?php foreach($this->getItems() as $_item):
+	$array_added_product[]=$_item->getProductId();?>
+<?php endforeach ?>
+
+<?php
+	//print_r($array_added_product);
+	$total_product=sizeof($array_added_product);
+	//echo "<br>".$total_product;
+	if($total_product > 0){
+		$last_product=$array_added_product[($total_product-1)];
+	}
+?>
+
+<?php
+	$nProducts = $total_product;
+	$_product = Mage::getModel('catalog/product')->load($total_product-1);
+	$ids = array();
+		while ((count($ids) < 5) && ($nProducts > 0)){
+			$nProducts --;
+			$last_product=$array_added_product[($nProducts)];
+			$_product1 = Mage::getModel('catalog/product')->load($last_product);
+
+			if (!$_product1->hasRelatedProductIds()) {
+				foreach ($_product1->getRelatedProducts() as $product) {
+					if (count($ids) < 5) $ids[] = $product->getId();
+					else break;
+				}
+				$_product->setRelatedProductIds($ids);
+			}
+		}
+?>
+
+<?php $product_per_row=5; //how many product show in a row ?>
+
+<table width="100%" align="center" cellpadding="0" cellspacing="0" style="margin-bottom:10px; border:1px solid #dbdbdb;">
+<tr>
+	<td  width="100%" align="left" valign="middle" colspan="<?php echo $product_per_row; ?>">Related Items</td>
+</tr>
+
+<?php
+$product_counter=0;
+foreach ($_product->getData('related_product_ids') as $r_productid) {
+$_product = Mage::getModel('catalog/product')->load($r_productid);
+?>
+
+<?php if(($product_counter%$product_per_row)==0){ ?>
+<tr>
+<?php } ?>
+
+<td valign="top" style="padding:15px;" width="21%">
+	<div>
+		<a href="<?php echo $_product->getProductUrl() ?>" style="text-decoration:none;margin-left:30px;text-align:center;">
+		<img src="<? echo Mage::helper('catalog/image')->init($_product, 'thumbnail')->resize(50, 50); ?>" alt="<?php echo $this->htmlEscape($_product['name']); ?>" border="0" width="50" />
+		</a>
+		<a href="<?php echo $_product->getProductUrl() ?>" style="text-decoration:none; font-size:11px; color:#0076a3; font-weight:bold; text-align:left; ">
+		<br />
+		<?php
+		if (strlen($this->helper('catalog/output')->productAttribute($_product, $_product->getName(), 'name')) > 32) {echo substr($this->helper('catalog/output')->productAttribute($_product, $_product->getName(), 'name'),0,32)."...";}
+		else echo $this->helper('catalog/output')->productAttribute($_product, $_product->getName(), 'name');
+		?>
+		</a>
+		<div style="font-size:11px; color:#6b6a6a; font-weight:bold; text-align:left;margin-top:7px;">
+		List:<?php $price_mine= (float) $_product->getPrice();
+		$price_mine= number_format($price_mine,2);
+		?>
+		<?php echo "$". $price_mine; ?>
+		</div>
+		<div style="font-size:11px; color:#ff5907; font-weight:bold; text-align:left;">
+		Our Price:<?php $final_price= (float) $_product->getFinalPrice();
+		$final_price= number_format($final_price,2);
+		?>
+		<?php echo "$". $final_price; ?>
+		</div>
+		<div style="margin-top:7px; text-align:left; font-size:11px !important;text-decoration:underline;color:#959595;">
+		<a href="<?php echo $_product->getProductUrl() ?>" title="more info">more info</a>
+		</div>
+	</div>
+</td>
+<?php
+$product_counter++;
+if(($product_counter%$product_per_row)==0){
+?>
+</tr>
+<?php } ?>
+<?php } ?>
+</table>
+</div>
+<!-- Related products block END -->
