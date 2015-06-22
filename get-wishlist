@@ -1,4 +1,8 @@
 <?php
+// Add this code snipped to botton of cart to view wishlist under items to be checked out
+?>
+
+<?php
  $customer = Mage::getSingleton('customer/session')->getCustomer();
  if($customer->getId())
 {
